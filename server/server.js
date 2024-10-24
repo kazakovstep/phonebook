@@ -8,7 +8,6 @@ const PORT = process.env.PORT || 5000
 app.use(cors())
 app.use(express.json())
 
-// Настройка подключения к базе данных MySQL
 const db = mysql.createConnection({
 	host: 'localhost',
 	user: 'root',
@@ -24,7 +23,6 @@ db.connect(err => {
 	console.log('Подключение к базе данных MySQL успешно')
 })
 
-// API для управления контактами
 app.get('/api/contacts', (req, res) => {
 	db.query('SELECT * FROM contacts', (err, results) => {
 		if (err) return res.status(500).send(err)
@@ -40,6 +38,33 @@ app.post('/api/contacts', (req, res) => {
 		(err, results) => {
 			if (err) return res.status(500).send(err)
 			res.status(201).json({ id: results.insertId, name, phone })
+		}
+	)
+})
+
+app.delete('/api/contacts/:id', (req, res) => {
+	const { id } = req.params
+	db.query('DELETE FROM contacts WHERE id = ?', [id], (err, results) => {
+		if (err) return res.status(500).send(err)
+		if (results.affectedRows === 0) {
+			return res.status(404).json({ message: 'Контакт не найден' })
+		}
+		res.status(204).send()
+	})
+})
+
+app.put('/api/contacts/:id', (req, res) => {
+	const { id } = req.params
+	const { name, phone } = req.body
+	db.query(
+		'UPDATE contacts SET name = ?, phone = ? WHERE id = ?',
+		[name, phone, id],
+		(err, results) => {
+			if (err) return res.status(500).send(err)
+			if (results.affectedRows === 0) {
+				return res.status(404).json({ message: 'Контакт не найден' })
+			}
+			res.status(200).json({ id, name, phone })
 		}
 	)
 })

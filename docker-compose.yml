@@ -1,0 +1,33 @@
+version: '2.4'
+
+services:
+  server:
+    build:
+      context: ./server
+    ports:
+      - '5000:5000'
+    environment:
+      - MYSQL_HOST=db
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=papamama1R
+      - MYSQL_DATABASE=phonebook
+    depends_on:
+      - db
+
+  client:
+    build:
+      context: .
+    ports:
+      - '3000:80'
+
+  db:
+    image: mysql:5.7
+    platform: linux/amd64
+    environment:
+      MYSQL_ROOT_PASSWORD: papamama1R
+      MYSQL_DATABASE: phonebook
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  db_data:
